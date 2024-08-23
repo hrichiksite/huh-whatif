@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import { useState } from "react";
-
+import toast from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
@@ -12,6 +12,72 @@ export default function Home() {
   const [subHeading, setSubHeading] = useState('Imagine what could be possible if you knew the answer to the unknown')
   const [loading, setLoading] = useState(false)
   const [loadText, setLoadText] = useState(`Did you know that it's quite boring to wait...`)
+
+  const waitingPrompts = [
+    "Did you know? You look especially intelligent today!",
+    "Fun fact: You always bring such great energy to everything you do.",
+    "While you're waiting, remember that your creativity is inspiring!",
+    "Did you know? Your problem-solving skills are top-notch.",
+    "Just a reminder: Your hard work is really paying off.",
+    "Did you know? You have a knack for making things better.",
+    "While we're waiting, remember that your insight is truly valuable.",
+    "Fun fact: You have a talent for turning challenges into opportunities.",
+    "Did you know? Your enthusiasm is contagious.",
+    "Just a reminder: Your positive attitude makes a difference every day.",
+    "Did you know? Your smile lights up the room!",
+    "Fun fact: Your eyes are absolutely mesmerizing.",
+    "While you're waiting, just know you're on someone's mind.",
+    "Did you know? Your laugh is the sweetest sound.",
+    "Just a reminder: You make hearts skip a beat.",
+    "Did you know? Every moment with you feels magical.",
+    "While we're waiting, thinking about how amazing you are.",
+    "Fun fact: You have the most charming personality.",
+    "Did you know? Smiling whenever thinking of you.",
+    "Just a reminder: You're more beautiful than you realize."
+  ];
+
+  const getAnswerToast = async () => {
+    const interval = setInterval(() => {
+      setSubHeading(waitingPrompts[Math.floor(Math.random() * waitingPrompts.length)]);
+    }, 2000);
+
+    const getAnswer = new Promise(async (resolve, reject) => {
+      setLoading(true)
+
+      const response = await fetch(
+        `/api/hello`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ question: input })
+        }
+      )
+      setLoading(false)
+      clearInterval(interval);
+      const data = await response.json()
+      if(data.status === 'error') {
+        reject()
+      }
+      setAnswer(data.answer)
+      setHeading(input)
+      setSubHeading(data.answer)
+
+      console.log(data)
+      setLoading(false)
+      resolve(data)
+    });
+
+    toast.promise(
+      getAnswer,
+      {
+        loading: <>{loadText}</>,
+        success: <b>Here's your answer!</b>,
+        error: <b>Could not answer :(</b>,
+      }
+    );
+  }
 
 
   return (
@@ -75,6 +141,7 @@ export default function Home() {
                     disabled={loading}
                     onClick={(e) => {
                       e.preventDefault()
+                      getAnswerToast()
                     }}
                   >
                     {loading ? (

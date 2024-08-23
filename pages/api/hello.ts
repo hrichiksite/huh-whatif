@@ -19,14 +19,14 @@ async function run(model: string, input: { messages: { role: string; content: st
   return result;
 }
 
-export default function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<Data>,
 ) {
   //get post data -- question
   const question = req.body.question;
   console.log({ question });
-  run("@hf/thebloke/mistral-7b-instruct-v0.1-awq", {
+  await run("@hf/thebloke/mistral-7b-instruct-v0.1-awq", {
     messages: [
       {
         role: "system",
