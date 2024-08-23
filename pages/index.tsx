@@ -3,7 +3,26 @@ import { Inter } from "next/font/google";
 import { useState } from "react";
 import toast from "react-hot-toast";
 const inter = Inter({ subsets: ["latin"] });
-
+import { Metadata } from 'next';
+export const metadata: Metadata = {
+  title: 'Huh, What if...',
+  description: 'Imagine what could be possible if you knew the answer to the unknown',
+  metadataBase: new URL('https://huh-whatif.vercel.app'),
+  openGraph: {
+    type: 'website',
+    url: 'https://huh-whatif.vercel.app',
+    title: 'Huh, What if...',
+    description: 'Imagine what could be possible if you knew the answer to the unknown',
+    images: [
+      {
+        url: 'https://cloud-8tz3eq9yk-hack-club-bot.vercel.app/0image.png',
+        width: 1545,
+        height: 1545,
+        alt: 'Huh, What if...',
+      },
+    ],
+  },
+};
 export default function Home() {
   const [input, setInput] = useState('')
   const [first, setfirst] = useState(0)
