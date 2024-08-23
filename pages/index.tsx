@@ -5,22 +5,23 @@ import { useState } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
-  const [input, setInput] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [first, setfirst] = useState(0);
-  const heading = "Huh, What if...";
-  const subHeading = "Imagine alternate realities";
+  const [input, setInput] = useState('')
+  const [first, setfirst] = useState(0)
+  const [answer, setAnswer] = useState('')
+  const [heading, setHeading] = useState('Huh, What if...')
+  const [subHeading, setSubHeading] = useState('Imagine what could be possible if you knew the answer to the unknown')
+  const [loading, setLoading] = useState(false)
+  const [loadText, setLoadText] = useState(`Did you know that it's quite boring to wait...`)
 
 
   return (
     <main
-      className={`flex min-h-screen flex-col items-center pt-24 justify-between ${inter.className}`}
+      className={`flex min-h-screen flex-col items-center pt-5 justify-between ${inter.className}`}
     >
       <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed hidden lg:block  left-0 top-0 w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
+        {/* <p className="fixed hidden lg:block  left-0 top-0 w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
           Get answers for the unknown
-        </p>
+        </p> */}
         {/* <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
           <a
             className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
@@ -65,7 +66,7 @@ export default function Home() {
                     }}
                     className="flex h-10 w-full rounded-md border px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 max-w-lg flex-1 bg-gray-800 text-white border-gray-900"
                     type="text"
-                    value={""}
+                    value={input}
                     placeholder="Huh, What if..."
                   />
                   <button
