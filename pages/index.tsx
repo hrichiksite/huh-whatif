@@ -73,7 +73,7 @@ export default function Home() {
       getAnswer,
       {
         loading: <>{loadText}</>,
-        success: <b>Here's your answer!</b>,
+        success: <b>Here&apos;s your answer!</b>,
         error: <b>Could not answer :(</b>,
       }
     );
