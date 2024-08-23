@@ -1,4 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import { track } from '@vercel/analytics/server';
 
 type Data = {
   answer?: string,
@@ -26,6 +27,7 @@ export default async function handler(
   //get post data -- question
   const question = req.body.question;
   console.log({ question });
+  track("question", { question });
   await run("@hf/thebloke/mistral-7b-instruct-v0.1-awq", {
     messages: [
       {
