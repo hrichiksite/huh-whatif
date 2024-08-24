@@ -7,7 +7,7 @@ type Data = {
   error?: string
 };
 
-async function run(model: string, input: { messages: { role: string; content: string }[] }) {
+async function run(model: string, input: { messages: { role: string; content: string }[], max_tokens: number }) {
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCID}/ai/run/${model}`,
     {
@@ -39,6 +39,7 @@ export default async function handler(
         content: question,
       },
     ],
+    max_tokens: 200,
   }).then((response) => {
     try {
       const result = response.result.response
