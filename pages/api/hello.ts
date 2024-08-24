@@ -7,7 +7,7 @@ type Data = {
   error?: string
 };
 
-async function run(model: string, input: { messages: { role: string; content: string }[], max_tokens: number }) {
+async function run(model: string, input: { messages: { role: string; content: string }[], max_tokens: number, stream: boolean }) {
   const response = await fetch(
     `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCID}/ai/run/${model}`,
     {
@@ -16,8 +16,18 @@ async function run(model: string, input: { messages: { role: string; content: st
       body: JSON.stringify(input),
     }
   );
+  
+  if(input.stream) {
+  //streaming response
+  const reader = response.body?.getReader();
+  return reader;
+  } else {
+  //normal response
   const result = await response.json();
   return result;
+  }
+  
+
 }
 
 export default async function handler(
@@ -40,11 +50,35 @@ export default async function handler(
       },
     ],
     max_tokens: 200,
+    stream: true,
   }).then((response) => {
     try {
-      const result = response.result.response
+      //reader returned, use text decoder to decode stream
+      const decoder = new TextDecoder();
+      //pass stream as is to response
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      
+      response.read().then(function processText({ done, value }: { done: boolean, value: Uint8Array }) {
+        if (done) {
+          res.end();
+          return;
+        }
+        //get data: out
+        
+        const text = decoder.decode(value, { stream: true });
+        if(text.startsWith('data: {')) {
+          console.log(text)
+        let jsondata = JSON.parse(text.replace('data: ', ''));
+        console.log(jsondata);
+        console.log(jsondata.response);
+        res.write(`${text}\n\n`);
+        return response.read().then(processText);
+        }
+      });
 
-      res.send({ status: "success", answer: result });
+      //res.send({ status: "success", answer: result });
 
     } catch (e) {
       console.error(e)
