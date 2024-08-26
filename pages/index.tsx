@@ -54,20 +54,40 @@ export default function Home() {
           body: JSON.stringify({ question: input })
         }
       )
-      setLoading(false)
-      clearInterval(interval);
-      const data = await response.json()
-      if(data.status === 'error') {
-        reject()
-      }
-      setAnswer(data.answer)
-      setHeading(input)
-      setSubHeading(data.answer)
+      // get stream
+    //   const stream = new ReadableStream({
+    //     start(controller) {
+    //       setLoading(false)
 
-      console.log(data)
-      setLoading(false)
-      resolve(data)
-    });
+    //       const reader = response.body?.getReader();
+    //       let decoder = new TextDecoder();
+    //       let buffer = '';
+    //       reader.read().then(function processText({ done, value }) {
+    //         if (done) {
+    //           controller.close();
+    //           return;
+    //         }
+    //         buffer += decoder.decode(value, { stream: true });
+    //         const lines = buffer.split('\n');
+    //         buffer = lines.pop();
+    //         for (const line of lines) {
+    //           if (line === '[DONE]') {
+    //             controller.close();
+    //             resolve()
+    //             return;
+    //           }
+    //           const data = JSON.parse(line.replace('data: ', ''));
+    //           console.log(data)
+    //           if (data.nextword) {
+    //             setAnswer(answer+data.nextword)
+    //           }
+    //         }
+    //         return reader.read().then(processText);
+    //       });
+    //     }
+    //   });
+     });
+    
 
     toast.promise(
       getAnswer,

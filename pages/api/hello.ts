@@ -1,5 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { track } from '@vercel/analytics/server';
+import OpenAI from 'openai';
+const client = new OpenAI({
+  baseURL: process.env.OPENAI_API_BASE || `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCID}/ai/v1`,
+  apiKey: process.env.OPENAI_API_KEY || process.env.CF_TOKEN
+});
 
 type Data = {
   answer?: string,
@@ -7,28 +11,9 @@ type Data = {
   error?: string
 };
 
-async function run(model: string, input: { messages: { role: string; content: string }[], max_tokens: number, stream: boolean }) {
-  const response = await fetch(
-    `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCID}/ai/run/${model}`,
-    {
-      headers: { Authorization: "Bearer " + process.env.CF_TOKEN },
-      method: "POST",
-      body: JSON.stringify(input),
-    }
-  );
-  
-  if(input.stream) {
-  //streaming response
-  const reader = response.body?.getReader();
-  return reader;
-  } else {
-  //normal response
-  const result = await response.json();
-  return result;
-  }
-  
-
-}
+export const config = {
+  supportsResponseStreaming: true,
+};
 
 export default async function handler(
   req: NextApiRequest,
@@ -37,8 +22,12 @@ export default async function handler(
   //get post data -- question
   const question = req.body.question;
   console.log({ question });
-  track("question", { question });
-  await run("@hf/thebloke/mistral-7b-instruct-v0.1-awq", {
+      // Set headers to support SSE (Server-Sent Events)
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+      res.flushHeaders(); // Send headers immediately
+  const chatCompletion = await client.chat.completions.create({
     messages: [
       {
         role: "system",
@@ -49,42 +38,21 @@ export default async function handler(
         content: question,
       },
     ],
-    max_tokens: 200,
+    model: "@hf/thebloke/mistral-7b-instruct-v0.1-awq",
     stream: true,
-  }).then((response) => {
-    try {
-      //reader returned, use text decoder to decode stream
-      const decoder = new TextDecoder();
-      //pass stream as is to response
-      res.setHeader("Content-Type", "text/event-stream");
-      res.setHeader("Cache-Control", "no-cache");
-      res.setHeader("Connection", "keep-alive");
-      
-      response.read().then(function processText({ done, value }: { done: boolean, value: Uint8Array }) {
-        if (done) {
-          res.end();
-          return;
-        }
-        //get data: out
-        
-        const text = decoder.decode(value, { stream: true });
-        if(text.startsWith('data: {')) {
-          console.log(text)
-        let jsondata = JSON.parse(text.replace('data: ', ''));
-        console.log(jsondata);
-        console.log(jsondata.response);
-        res.write(`${text}\n\n`);
-        return response.read().then(processText);
-        }
-      });
+    max_tokens: 20,
+   });
+   //convert this to a stream
+   let stream;
+   //make
+   for await (const chunk of chatCompletion) {
+    let nextword = chunk.choices[0]?.delta?.content
+    res.write(`data: ${JSON.stringify({nextword})}\n\n`);
+    console.log(res.writable)
+    //process.stdout.write(chunk.choices[0]?.delta?.content || '');
+  }
 
-      //res.send({ status: "success", answer: result });
-
-    } catch (e) {
-      console.error(e)
-      console.info(response)
-      res.status(500)
-      .send({ status: "error", error: `I'm very sorry, I was unable to process your request. If you could please try again, I would be very grateful. There may be a rat chewing on my wires. I'm not sure. I hope it's fine.` });
-    }
-  });
+      res.write(`data: [DONE]\n\n`);
+      // End the response
+      res.end();
 }
