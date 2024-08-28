@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"] });
 export default function Home() {
   const [input, setInput] = useState('')
   const [first, setfirst] = useState(0)
-  const [answer, setAnswer] = useState('')
+  const [answer, setAnswer] = useState(false)
   const [heading, setHeading] = useState('Huh, What if...')
   const [subHeading, setSubHeading] = useState('Imagine what could be possible if you knew the answer to the unknown')
   const [loading, setLoading] = useState(false)
@@ -45,7 +45,7 @@ export default function Home() {
       setLoading(true)
 
       const response = await fetch(
-        `/api/hello`,
+        `https://cuddly-computing-machine-5rrwgr459px3wx4-3000.app.github.dev/api/whatif`,
         {
           method: 'POST',
           headers: {
@@ -53,21 +53,90 @@ export default function Home() {
           },
           body: JSON.stringify({ question: input })
         }
-      )
-      setLoading(false)
-      clearInterval(interval);
-      const data = await response.json()
-      if(data.status === 'error') {
-        reject()
+      );
+      const reader = response.body?.pipeThrough(new TextDecoderStream()).getReader();
+      if (!reader) return;
+      // eslint-disable-next-line no-constant-condition
+      let theanswer = '';
+      let justgot = false;
+      while (true) {
+        // eslint-disable-next-line no-await-in-loop
+        const { value, done } = await reader.read();
+        if (done) break;
+        let dataDone = false;
+        const arr = value.split('\n');
+        arr.forEach((data) => {
+          if (data.length === 0) return; // ignore empty message
+          if (data.startsWith(':')) return; // ignore sse comment message
+          if (data === 'data: [DONE]') {
+            dataDone = true;
+            return;
+          }
+          const json = JSON.parse(data.substring(6));
+          console.log(json);
+          
+          if (json.nw) {
+            if(!justgot){
+              setLoading(false)
+              clearInterval(interval);
+              setHeading(input)
+              setAnswer(true)
+            }
+            theanswer += json.nw;
+            setSubHeading(theanswer)
+          }
+        });
+        if (dataDone) break;
       }
-      setAnswer(data.answer)
-      setHeading(input)
-      setSubHeading(data.answer)
+      //check for '</s>'
+       if (theanswer.includes('</s>')) {
+        theanswer = theanswer.replace('</s>', '');
+        setSubHeading(theanswer)
+      }
+      resolve('done');
+      
+        // …
+      });
 
-      console.log(data)
-      setLoading(false)
-      resolve(data)
-    });
+      //get the stream - {"nw":"WORD"}
+
+
+      
+
+      // get stream
+    //   const stream = new ReadableStream({
+    //     start(controller) {
+    //       setLoading(false)
+
+    //       const reader = response.body?.getReader();
+    //       let decoder = new TextDecoder();
+    //       let buffer = '';
+    //       reader.read().then(function processText({ done, value }) {
+    //         if (done) {
+    //           controller.close();
+    //           return;
+    //         }
+    //         buffer += decoder.decode(value, { stream: true });
+    //         const lines = buffer.split('\n');
+    //         buffer = lines.pop();
+    //         for (const line of lines) {
+    //           if (line === '[DONE]') {
+    //             controller.close();
+    //             resolve()
+    //             return;
+    //           }
+    //           const data = JSON.parse(line.replace('data: ', ''));
+    //           console.log(data)
+    //           if (data.nextword) {
+    //             setAnswer(answer+data.nextword)
+    //           }
+    //         }
+    //         return reader.read().then(processText);
+    //       });
+    //     }
+    //   });
+
+    
 
     toast.promise(
       getAnswer,
