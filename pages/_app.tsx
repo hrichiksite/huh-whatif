@@ -21,8 +21,8 @@ export default function App({ Component, pageProps }: AppProps) {
       <meta property="og:image:secure_url" content="https://cloud-8tz3eq9yk-hack-club-bot.vercel.app/0image.png" />
       <meta property="og:image:alt" content="Huh, What if..." />
     </Head>
-    {/* For Local Development */}
-    {/* <Script strategy="afterInteractive" src="https://umami.hrichik.xyz/script.js" data-website-id="0a20bdb6-769c-432a-9d10-b60eca839914"></Script> */}
+    {/* For Local Development, disable */}
+    <Script strategy="afterInteractive" src="https://umami.hrichik.xyz/script.js" data-website-id="0a20bdb6-769c-432a-9d10-b60eca839914"></Script>
 
   <Component {...pageProps} />
   <Analytics/>
