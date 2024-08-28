@@ -45,7 +45,7 @@ export default function Home() {
       setLoading(true)
 
       const response = await fetch(
-        `https://cuddly-computing-machine-5rrwgr459px3wx4-3000.app.github.dev/api/whatif`,
+        `${process.env.NEXT_PUBLIC_APIURL}/api/whatif`,
         {
           method: 'POST',
           headers: {
