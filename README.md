@@ -29,10 +29,3 @@ Deployed using Vercel
 ## Contributing
 
 We welcome contributions from the community! If you have ideas, suggestions, or want to report bugs, please submit an issue or pull request on our GitHub repository.
-
-
-For any inquiries, suggestions, or support, feel free to reach out to us at [email@example.com].
-
----
-
-This README provides a detailed overview of your project, highlighting the tech stack and offering clear instructions for getting started.
